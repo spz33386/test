@@ -1,0 +1,75 @@
+﻿@model MvcApplication3.Models.Order
+@{
+    ViewBag.Title = "Home Page";
+}
+@Scripts.Render("~/Scripts/jquery-1.8.2.js")
+@Scripts.Render("~/Scripts/Custom/DateFormat.js")
+@section featured {
+    <section class="featured">
+        <div class="content-wrapper">
+            <hgroup class="title">
+                <h1>@ViewBag.Title.</h1>
+                <h2>@ViewBag.Message</h2>
+            </hgroup>
+            <p>
+                To learn more about ASP.NET MVC visit
+                <a href="http://asp.net/mvc" title="ASP.NET MVC Website">http://asp.net/mvc</a>.
+                The page features <mark>videos, tutorials, and samples</mark> to help you get the most from ASP.NET MVC.
+                If you have any questions about ASP.NET MVC visit
+                <a href="http://forums.asp.net/1146.aspx/1?MVC" title="ASP.NET MVC Forum">our forums</a>.
+            </p>
+        </div>
+    </section>
+}
+<h3>We suggest the following:</h3>
+
+@Html.ValidationSummary()
+<div class="container" style="padding: 0 15px;">  
+   <small>时间 </small>
+     @Html.EditorFor(m => m.Date, true)
+     @Html.ValidationMessageFor(model => model.Date)
+    <input type="submit" value="Create" />
+    <br/>
+    <div id="error" style="background-color: yellow;">待定</div>
+</div>
+
+<div><button id="submit">SubmitWrong</button><br/>
+    <button id="submit2">SubmitRightwithGet</button><br/>
+    <button id="submit3">SubmitWithPost</button>
+</div>
+<script type="text/javascript">
+    $(function () {
+        $("#submit2").click(function() {
+            var futureDate = new Date("2016/7/7");
+            $.get("Home/submit", { ClientName: "Pengzhen", Date: futureDate.toISOString(), TermsAccepted: true }, function (result, status) {
+                if (result.header.RspStatus == 200) {
+                    $("#error").css("background-color", "green").html("Congratulations!");
+                } else {
+                    $("#error").html("<ul><li>RspStatus: " + result.header.RspStatus + "</li><li>Key: " + result.header.key + "</li><li>Error: " + result.header.RspDesc +"</li></ul>");
+                }
+            });
+        });
+        $("#submit3").click(function () {
+            var futureDate = new Date("2016/7/7");
+            $.post("Home/submit2", { ClientName: "Pengzhen", Date: futureDate.toISOString(), TermsAccepted: true }, function (result, status) {
+                if (result.header.RspStatus == 200) {
+                    $("#error").css("background-color", "green").html("Congratulations!");
+                } else {
+                    $("#error").html("<ul><li>RspStatus: " + result.header.RspStatus + "</li><li>Key: " + result.header.key + "</li><li>Error: " + result.header.RspDesc + "</li></ul>");
+                }
+            });
+        });
+        $("#submit").click(function () {
+            var nowdate = new Date();
+            $.get("Home/submit", { ClientName: "Pengzhen", Date: nowdate.toISOString(), TermsAccepted: true }, function (result,status) {
+                if (result.header.RspStatus == 200) {
+                    $("#error").css("background-color", "green").html("Congratulations!");
+
+                } else {
+                    $("#error").css("background-color", "#b5a5a5");
+                    $("#error").html("<ul style='backgroud'><li>RspStatus: " + result.header.RspStatus + "</li><li>Key: " + result.header.Key + "</li><li>Error: " + result.header.RspDesc + "</li></ul>");
+                }
+            });
+        });
+    });
+</script>
