@@ -13,8 +13,8 @@ namespace MvcApplication3.Common
     public class JsonResultExtForPC:JsonResult
     {
         private string dateTimeFormat = "yyyy-MM-dd HH:mm:ss";
-        
-        public ModelStateDictionary ModelStateDictionary { get; set; }
+
+        public PCHeaderModel PcHeaderModel { get; set; }
 
         public JsonResultExtForPC()
         {
@@ -23,7 +23,8 @@ namespace MvcApplication3.Common
         public JsonResultExtForPC(object data, JsonRequestBehavior behavior = JsonRequestBehavior.AllowGet, string datetimeFormat = "yyyy-MM-dd HH:mm:ss")
         {
             var pcResponseModel = new PCResponseModel();
-            pcResponseModel.header = new PCHeaderModel() { RspStatus = 200, Key = null, RspDesc = null };
+            this.PcHeaderModel = new PCHeaderModel() { RspStatus = 200, Key = null, RspDesc = null };
+            pcResponseModel.header = this.PcHeaderModel;
             pcResponseModel.body = (object)data;
             this.Data = pcResponseModel;
             this.JsonRequestBehavior = behavior;
@@ -32,7 +33,6 @@ namespace MvcApplication3.Common
 
         public JsonResultExtForPC(object data, ModelStateDictionary modelStateDic, JsonRequestBehavior behavior = JsonRequestBehavior.AllowGet, string datetimeFormat = "yyyy-MM-dd HH:mm:ss")
         {
-
             if (modelStateDic != null)
             {
                 var errorModel =
@@ -45,6 +45,7 @@ namespace MvcApplication3.Common
                             RspDesc = modelStateDic[x].Errors.Select(y => y.ErrorMessage).First()
                         }).First();
                 var pcResponseModel = new PCResponseModel();
+                this.PcHeaderModel = (PCHeaderModel) errorModel;
                 pcResponseModel.header = (PCHeaderModel)errorModel;
                 pcResponseModel.body = null;
                 this.Data = pcResponseModel;

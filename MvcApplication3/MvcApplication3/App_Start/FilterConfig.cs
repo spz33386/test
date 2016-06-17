@@ -10,7 +10,7 @@ namespace MvcApplication3
         {
             filters.Add(new HandleErrorAttribute());
             filters.Add(new LogInfoMessage());
-            filters.Add(new LogExceptionAttribute());
+            
         }
     }
 }

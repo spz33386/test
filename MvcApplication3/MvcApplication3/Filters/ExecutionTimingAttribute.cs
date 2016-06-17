@@ -37,6 +37,11 @@ namespace MvcApplication3.Filters
         private String url;
 
         /// <summary>
+        /// 当前请求URL
+        /// </summary>
+        private int status;
+
+        /// <summary>
         /// 请求controller
         /// </summary>
         private String controller;
@@ -52,42 +57,71 @@ namespace MvcApplication3.Filters
         private String IP;
 
         /// <summary>
-        /// 请求时间点
+        /// 请求开始时间
         /// </summary>
-        private String dateTime;
+        private String start_Time;
 
+        /// <summary>
+        /// 请求结束时间
+        /// </summary>
+        private String end_Time;
+
+        /// <summary>
+        /// 请求参数
+        /// </summary>
         private IDictionary<string, object> requestData;
 
         /// <summary>
-        /// 记录信息
+        /// 返回给View的参数
+        /// 类型jsonString
         /// </summary>
-        private StringBuilder mesge;
+        private String responseData;
 
-        private string responseData;
+        /// <summary>
+        /// exception信息
+        /// </summary>
+        private String errorMessage;
+
+        private StringBuilder message;
+
+        private LogLevel loglevel;
 
         /// <summary>
         /// 信息的格式整理
         /// </summary>
         public void GetMessage()
         {
-
-            this.mesge = new StringBuilder();
-            this.mesge.Append("IP=");
-            this.mesge.Append(this.IP + "|");
-            this.mesge.Append("Controller=");
-            this.mesge.Append(this.controller + "|");
-            this.mesge.Append("Action=");
-            this.mesge.Append(this.action + "|");
-            this.mesge.Append("TimeStamp=");
-            this.mesge.Append(this.dateTime + "|");
-
+            this.message = new StringBuilder();
+            this.message.Append("URL=");
+            this.message.Append(this.url + "|");
+            this.message.Append("Status=");
+            this.message.Append(this.status + "|");
+            this.message.Append("IP=");
+            this.message.Append(this.IP + "|");
+            this.message.Append("Controller=");
+            this.message.Append(this.controller + "|");
+            this.message.Append("Action=");
+            this.message.Append(this.action + "|");
+            this.message.Append("StartTime=");
+            this.message.Append(this.start_Time + "|");
             if (this.requestData != null)
             {
                 var data = JsonConvert.SerializeObject(this.requestData.Values);
-                this.mesge.Append("RequestData=");
-                this.mesge.Append(data + "|");
+                this.message.Append("RequestData=");
+                this.message.Append(data + "|");
             }
-
+            this.message.Append("EndTime=");
+            this.message.Append(this.end_Time + "|");
+            this.message.Append("ResponseData=");
+            this.message.Append(this.end_Time + "|");
+            if (this.responseData != null)
+            {
+                this.message.Append("responseData=");
+                this.message.Append(this.responseData + "|");
+            }
+            this.message.Append("Message=");
+            this.message.Append(this.errorMessage + "|");
+            
         }
 
         /// <summary>
@@ -105,12 +139,8 @@ namespace MvcApplication3.Filters
                 this.controller = filterContext.ActionDescriptor.ControllerDescriptor.ControllerName;
                 this.action = filterContext.ActionDescriptor.ActionName;
                 this.IP = filterContext.HttpContext.Request.UserHostAddress;
-                this.dateTime = filterContext.HttpContext.Timestamp.ToString(CultureInfo.InvariantCulture);
-                this.requestData = filterContext.ActionParameters;
-               
-                this.GetMessage();
-
-                logger.Log(LogLevel.Info, this.mesge.ToString());
+                this.start_Time = filterContext.HttpContext.Timestamp.ToString(CultureInfo.InvariantCulture);
+                this.requestData = filterContext.ActionParameters;              
             }
 
             base.OnActionExecuting(filterContext);
@@ -122,22 +152,33 @@ namespace MvcApplication3.Filters
             if (this.timingEnabled)
             {
                 this.timer.Stop();
-                this.dateTime = DateTime.Now.ToString(CultureInfo.InvariantCulture);
+                this.end_Time = DateTime.Now.ToString(CultureInfo.InvariantCulture);
                 this.GetMessage();
-                this.mesge.Append("ExectionTime=");
-                this.mesge.Append(string.Format(CultureInfo.InvariantCulture, "{0}ms |", this.timer.ElapsedMilliseconds));
+                this.message.Append("Elapsed time=");
+                this.message.Append(string.Format(CultureInfo.InvariantCulture, "{0}ms |", this.timer.ElapsedMilliseconds));
+                this.loglevel = LogLevel.Info;
+                this.status = 200;
                 if (filterContext.Result is ViewResult)
                 {
                     this.responseData = JsonConvert.SerializeObject(((ViewResult)filterContext.Result).ViewData.Model);
                     ((ViewResult)filterContext.Result).ViewData["ExecutionTime"] = this.timer.ElapsedMilliseconds;
+                    
                 }
                 else if (filterContext.Result is JsonResult)
                 {
                     this.responseData = JsonConvert.SerializeObject(((JsonResultExtForPC)filterContext.Result).Data);
+                    this.status = ((JsonResultExtForPC)filterContext.Result).PcHeaderModel.RspStatus;
+                    this.loglevel = this.status == 200 ? LogLevel.Info : LogLevel.Warn;
                 }
-                this.mesge.Append("ResponseData=");
-                this.mesge.Append(this.responseData + "|");
-                logger.Log(LogLevel.Info, this.mesge.ToString());
+                if (filterContext.Exception != null)
+                {
+                    this.errorMessage = filterContext.Exception.Message;
+                    this.status = (int)ResponseStatus.ServerError;
+                    this.loglevel = LogLevel.Error;
+                }
+                this.GetMessage();               
+                logger.Log(this.loglevel, this.message.ToString());
+                
             }
         }
     }

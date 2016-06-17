@@ -18,13 +18,6 @@ namespace MvcApplication3.ParaModel
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
             var errors = new List<ValidationResult>();
-            //获取displayName 属性以供错误信息使用
-            //Type type = typeof(Product);
-            //EntityAttribute entityAttribute = new EntityAttribute(type);
-            //PropertyInfo[] PropertyInfos = type.GetProperties();
-            //string shippingDisplayName = entityAttribute.GetDisplayAttributeName("Shipping");
-            //string inventoryDisplayName = entityAttribute.GetDisplayAttributeName("Inventory");
-            //return new ValidationResult(string.Format("{0}数量不能大于{1}数量", shippingDisplayName, inventoryDisplayName), new string[] { "Shipping" });
             if (string.IsNullOrEmpty(this.ClientName))
             {
                 errors.Add(new ValidationResult("Please enter your name", new string[] { "ClientName" }));

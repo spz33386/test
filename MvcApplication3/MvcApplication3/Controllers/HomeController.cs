@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using System.Web.Helpers;
 using System.Web.Mvc;
 using MvcApplication3.Filters;
 using MvcApplication3.Models;
@@ -28,7 +29,7 @@ namespace MvcApplication3.Controllers
             return View(order);
         }
         [HttpGet]
-        [JsonException]
+        [Json]
         public ActionResult Submit(OrderParaModel orderParaModel)
         {
             if (ModelState.IsValid)
@@ -43,7 +44,7 @@ namespace MvcApplication3.Controllers
         }
 
         [HttpPost]
-        [JsonException]
+        [Json]
         public ActionResult Submit2(OrderParaModel orderParaModel)
         {
             if (ModelState.IsValid)

@@ -51,7 +51,7 @@
         });
         $("#submit3").click(function () {
             var futureDate = new Date("2016/7/7");
-            $.post("Home/submit2", { ClientName: "Pengzhen", Date: futureDate.toISOString(), TermsAccepted: true }, function (result, status) {
+            $.post("Json/OrderQueryService/OrderbyId", { ClientName: "Pengzhen", Date: futureDate.toISOString(), TermsAccepted: true }, function (result, status) {
                 if (result.header.RspStatus == 200) {
                     $("#error").css("background-color", "green").html("Congratulations!");
                 } else {
