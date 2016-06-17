@@ -61,8 +61,13 @@ namespace MvcApplication3.Handler
             //service
             IService serviceInstance = this.CreateServiceInstance(requestContext);
             string serviceMethodName = requestContext.RouteData.GetRequiredString("action");
-            MethodInfo serviceMethod = serviceInstance.GetType().GetMethod(serviceMethodName);
-            string jsonResult = JsonConvert.SerializeObject(new JsonResultExtForPC(serviceMethod.Invoke(serviceInstance, null)).Data);
+            MethodInfo method = serviceInstance.GetType().GetMethods().First(m => string.Compare(serviceMethodName, m.Name, true) == 0);
+            List<object> parameters = new List<object>();
+           foreach (ParameterInfo parameter in method.GetParameters())
+           {
+               
+           }
+            string jsonResult = JsonConvert.SerializeObject(new JsonResultExtForPC(method.Invoke(serviceInstance, null)).Data);
 
             response.Clear();
             response.ContentType = "application/json";
