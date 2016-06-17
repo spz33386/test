@@ -1,0 +1,23 @@
+Controller 激活系统详解
+http://www.cnblogs.com/artech/archive/2012/03/31/controller-activation-01.html
+http://www.cnblogs.com/willick/p/3331513.html
+http://blog.csdn.net/sundacheng1989/article/details/10323483
+依赖注入
+http://stackoverflow.com/questions/25222474/what-is-best-way-to-pass-injections-to-base-controller-when-using-c-sharp-struct
+
+动态执行方法
+MethodInfo method = controllerContext.Controller.GetType().GetMethods().First(m => string.Compare(actionName, m.Name, true) == 0);
+
+http://www.cnblogs.com/artech/archive/2012/03/12/mvc-how-to-work-04.html
+
+mvc如何达到routeHandler
+http://www.cnblogs.com/keyindex/archive/2012/08/11/2634005.html
+
+自定义controller factory
+http://weblogs.asp.net/fredriknormen/asp-net-mvc-framework-create-your-own-iroutehandler
+http://www.cnblogs.com/luminji/archive/2011/09/07/2169674.html
+
+redis 缓存
+http://bps.17usoft.com/pages/viewpage.action?pageId=7407475
+
+回家总结……..
