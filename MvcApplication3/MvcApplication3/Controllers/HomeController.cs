@@ -19,6 +19,7 @@ namespace MvcApplication3.Controllers
         private OrderService orderService = new OrderService();
         public ActionResult Index(int? id)
         {
+            HttpContext.Session["sessionString"] = "myOwn";
             ViewBag.Message = "Modify this template to jump-start your ASP.NET MVC application.";
             var order = new Order()
             {
@@ -30,16 +31,13 @@ namespace MvcApplication3.Controllers
         }
         [HttpGet]
         [Json]
-        public ActionResult Submit(OrderParaModel orderParaModel)
-        {
-            if (ModelState.IsValid)
+        public JsonResult Submit(OrderParaModel orderParaModel)
+        {            
+            var model = orderService.getOrderbyID(orderParaModel);
+            if (model != null)
             {
-                return new JsonResultExtForPC(orderService.getOrderbyID(orderParaModel));
             }
-            else
-            {               
-                return new JsonResultExtForPC(null, ModelState, JsonRequestBehavior.AllowGet);
-            }
+            return Json(model, JsonRequestBehavior.AllowGet);
 
         }
 

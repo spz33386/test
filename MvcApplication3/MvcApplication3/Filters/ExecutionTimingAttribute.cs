@@ -11,6 +11,7 @@ using System.Web.Mvc;
 using MvcApplication3.Common.Extension;
 using MvcApplication3.ViewModel;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using NLog;
 using System.Text;
 using ActionFilterAttribute = System.Web.Mvc.ActionFilterAttribute;
@@ -66,6 +67,7 @@ namespace MvcApplication3.Filters
         /// </summary>
         private String end_Time;
 
+        private string ellapsedTime;
         /// <summary>
         /// 请求参数
         /// </summary>
@@ -96,6 +98,8 @@ namespace MvcApplication3.Filters
             this.message.Append(this.url + "|");
             this.message.Append("Status=");
             this.message.Append(this.status + "|");
+            this.message.Append("Elapsed time= ");
+            this.message.Append(this.ellapsedTime + "|");
             this.message.Append("IP=");
             this.message.Append(this.IP + "|");
             this.message.Append("Controller=");
@@ -121,7 +125,7 @@ namespace MvcApplication3.Filters
             }
             this.message.Append("Message=");
             this.message.Append(this.errorMessage + "|");
-            
+
         }
 
         /// <summary>
@@ -140,7 +144,38 @@ namespace MvcApplication3.Filters
                 this.action = filterContext.ActionDescriptor.ActionName;
                 this.IP = filterContext.HttpContext.Request.UserHostAddress;
                 this.start_Time = filterContext.HttpContext.Timestamp.ToString(CultureInfo.InvariantCulture);
-                this.requestData = filterContext.ActionParameters;              
+                this.requestData = filterContext.ActionParameters;
+
+                var modelStateDic = filterContext.Controller.ViewData.ModelState;
+                if (!modelStateDic.IsValid)
+                {
+                    var errorModel =
+                       (from x in modelStateDic.Keys
+                        where modelStateDic[x].Errors.Count > 0
+                        select new PCHeaderModel()
+                        {
+                            RspStatus = (int)ResponseStatus.ParamError,
+                            Key = x,
+                            RspDesc = modelStateDic[x].Errors.Select(y => y.ErrorMessage).First()
+                        }).First();
+                    var PcHeaderModel = (PCHeaderModel)errorModel;
+                    this.status = PcHeaderModel.RspStatus;
+                    this.errorMessage = PcHeaderModel.RspDesc;
+                    this.loglevel = LogLevel.Info;
+                    this.timer.Stop();
+                    this.end_Time = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                    this.ellapsedTime = string.Format(CultureInfo.InvariantCulture, "{0}ms |", this.timer.ElapsedMilliseconds);
+                    IsoDateTimeConverter dateTimeConverter = new IsoDateTimeConverter();
+                    dateTimeConverter.DateTimeFormat = "yyyy-MM-dd HH:mm:ss";
+                    this.responseData = JsonConvert.SerializeObject(new JsonResultExtForPC(null, modelStateDic), new JsonConverter[1]
+                        {
+                          (JsonConverter)dateTimeConverter
+                        });
+                    this.GetMessage();
+                    logger.Log(this.loglevel, this.message);
+                    filterContext.Result = new JsonResultExtForPC(null, modelStateDic);
+                }
+
             }
 
             base.OnActionExecuting(filterContext);
@@ -152,33 +187,41 @@ namespace MvcApplication3.Filters
             if (this.timingEnabled)
             {
                 this.timer.Stop();
+                this.ellapsedTime = string.Format(CultureInfo.InvariantCulture, "{0}ms |", this.timer.ElapsedMilliseconds);
                 this.end_Time = DateTime.Now.ToString(CultureInfo.InvariantCulture);
-                this.GetMessage();
-                this.message.Append("Elapsed time=");
-                this.message.Append(string.Format(CultureInfo.InvariantCulture, "{0}ms |", this.timer.ElapsedMilliseconds));
                 this.loglevel = LogLevel.Info;
                 this.status = 200;
-                if (filterContext.Result is ViewResult)
-                {
-                    this.responseData = JsonConvert.SerializeObject(((ViewResult)filterContext.Result).ViewData.Model);
-                    ((ViewResult)filterContext.Result).ViewData["ExecutionTime"] = this.timer.ElapsedMilliseconds;
-                    
-                }
-                else if (filterContext.Result is JsonResult)
-                {
-                    this.responseData = JsonConvert.SerializeObject(((JsonResultExtForPC)filterContext.Result).Data);
-                    this.status = ((JsonResultExtForPC)filterContext.Result).PcHeaderModel.RspStatus;
-                    this.loglevel = this.status == 200 ? LogLevel.Info : LogLevel.Warn;
-                }
                 if (filterContext.Exception != null)
                 {
                     this.errorMessage = filterContext.Exception.Message;
                     this.status = (int)ResponseStatus.ServerError;
                     this.loglevel = LogLevel.Error;
+                }else if (filterContext.Result is ViewResult)
+                {
+                    this.responseData = JsonConvert.SerializeObject(((ViewResult)filterContext.Result).ViewData.Model);
+                    ((ViewResult)filterContext.Result).ViewData["ExecutionTime"] = this.timer.ElapsedMilliseconds;
+
                 }
-                this.GetMessage();               
+                else if (filterContext.Result is JsonResult)
+                {
+                    this.responseData = JsonConvert.SerializeObject(((System.Web.Mvc.JsonResult)(filterContext.Result)).Data);
+                    this.loglevel = this.status == 200 ? LogLevel.Info : LogLevel.Warn;
+                    var data = ((System.Web.Mvc.JsonResult)(filterContext.Result)).Data;
+                    string resMessage;
+
+                    bool validateResult = (data as BaseViewModel).Validate(out resMessage);
+                    if (!validateResult)
+                    {
+                        this.errorMessage = resMessage;
+                        this.loglevel = LogLevel.Info;
+                    }
+                    filterContext.Result = new JsonResultExtForPC(((System.Web.Mvc.JsonResult)(filterContext.Result)).Data);
+                }
+                
+                this.GetMessage();
                 logger.Log(this.loglevel, this.message.ToString());
                 
+
             }
         }
     }

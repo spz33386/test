@@ -197,6 +197,7 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Handler\BindPrameter.cs" />
     <Compile Include="Handler\CustomeRouteHandler.cs" />
     <Compile Include="Handler\JsonHandler.cs" />
     <Compile Include="IModelVerify.cs" />
@@ -205,12 +206,14 @@
     <Compile Include="Models\AccountModels.cs" />
     <Compile Include="Models\LogerModer.cs" />
     <Compile Include="Models\Order.cs" />
+    <Compile Include="ParaModel\IModelValidate.cs" />
     <Compile Include="ParaModel\OrderParaModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ServiceFactory\ReflelctionServiceFactory.cs" />
     <Compile Include="Service\IService.cs" />
     <Compile Include="Service\OrderQueryService.cs" />
     <Compile Include="Service\OrderService.cs" />
+    <Compile Include="ViewModel\BaseViewModel.cs" />
     <Compile Include="ViewModel\OrderView.cs" />
     <Compile Include="ViewModel\PCHeaderModel.cs" />
     <Compile Include="ViewModel\PCResponseModel.cs" />

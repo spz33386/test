@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Web;
+using MvcApplication3.ViewModel;
 
 namespace MvcApplication3.ParaModel
 {
@@ -15,6 +16,7 @@ namespace MvcApplication3.ParaModel
         [DisplayName("日期")]
         public DateTime Date { get; set; }
         public bool TermsAccepted { get; set; }
+        
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
             var errors = new List<ValidationResult>();

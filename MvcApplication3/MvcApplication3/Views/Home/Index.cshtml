@@ -50,18 +50,18 @@
             });
         });
         $("#submit3").click(function () {
-            var futureDate = new Date("2016/7/7");
-            $.post("Json/OrderQueryService/OrderbyId", { ClientName: "Pengzhen", Date: futureDate.toISOString(), TermsAccepted: true }, function (result, status) {
+            var nowdate = new Date();
+            $.post("Json/OrderQueryService/OrderbyId", { ClientName: "Pengzhen", Date: nowdate.toISOString(), TermsAccepted: true }, function (result, status) {
                 if (result.header.RspStatus == 200) {
                     $("#error").css("background-color", "green").html("Congratulations!");
                 } else {
-                    $("#error").html("<ul><li>RspStatus: " + result.header.RspStatus + "</li><li>Key: " + result.header.key + "</li><li>Error: " + result.header.RspDesc + "</li></ul>");
+                    $("#error").html("<ul><li>RspStatus: " + result.header.RspStatus + "</li><li>Key: " + result.header.Key + "</li><li>Error: " + result.header.RspDesc + "</li></ul>");
                 }
             });
         });
         $("#submit").click(function () {
-            var nowdate = new Date();
-            $.get("Home/submit", { ClientName: "Pengzhen", Date: nowdate.toISOString(), TermsAccepted: true }, function (result,status) {
+            var futureDate = new Date("2016/7/7");
+            $.get("Home/submit", { ClientName: "Pengzhen", Date: futureDate.toISOString(), TermsAccepted: true }, function (result, status) {
                 if (result.header.RspStatus == 200) {
                     $("#error").css("background-color", "green").html("Congratulations!");
 

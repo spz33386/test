@@ -17,7 +17,7 @@ namespace MvcApplication3.Service
 
         }
 
-        public OrderView OrderbyId()
+        public OrderView OrderbyId(OrderParaModel orderParaModel)
         {
             OrderView orderView = null;
             try

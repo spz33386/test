@@ -19,15 +19,14 @@ namespace MvcApplication3.Service
                 var order = new Order();
                 order.Date = DateTime.Today;
                 order.ClientName = "xiao song";
-                orderView = OrderViewModelBuilder.BuildFromDomain(order);
+                orderView = new OrderView();
             }
             catch (Exception e)
             {
                 //log 记录
                 return null;
             }
-            var y = 0;
-            var x = 3 / y;
+
             return orderView;
         }
     }

@@ -22,8 +22,6 @@ namespace MvcApplication3.MappingProfile
         public static OrderView BuildFromParaModel(OrderParaModel orderParaModel)
         {
             var orderView = new OrderView();
-            var y = 0;
-            var x = 3 / y;
             orderView.ClientName = orderParaModel.ClientName;
             return orderView;
         }
